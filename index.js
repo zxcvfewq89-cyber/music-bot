@@ -45,14 +45,9 @@ function autoInstall() {
     } catch (e) { log.error('ติดตั้ง yt-dlp ไม่ได้: ' + e.message); }
   } else { log.info('พบ yt-dlp'); }
   
+  // บังคับใช้ ffmpeg ของระบบ Docker โดยตรง
   let ffmpegBin = 'ffmpeg';
-  try {
-    const ffmpegStatic = require('ffmpeg-static');
-    if (ffmpegStatic && fs.existsSync(ffmpegStatic)) {
-      ffmpegBin = ffmpegStatic;
-      log.info('ใช้ ffmpeg-static');
-    }
-  } catch (e) { log.warn('ไม่พบ ffmpeg-static ใช้ระบบหลักแทน'); }
+  log.info('ใช้ ffmpeg ของระบบ');
   
   process.env.PATH = `${binDir}:${process.env.PATH}`;
   process.env.FFMPEG_PATH = ffmpegBin;
