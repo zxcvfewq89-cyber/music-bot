@@ -52,7 +52,7 @@ function autoInstall() {
       ffmpegBin = ffmpegStatic;
       log.info('ใช้ ffmpeg-static');
     }
-  } catch (e) { log.warn('ไม่พบ ffmpeg-static'); }
+  } catch (e) { log.warn('ไม่พบ ffmpeg-static ใช้ระบบหลักแทน'); }
   
   process.env.PATH = `${binDir}:${process.env.PATH}`;
   process.env.FFMPEG_PATH = ffmpegBin;
@@ -227,7 +227,7 @@ async function updateUI(client,g){
     const lp=loopModes[g]||'off', vol=Math.round((volumes[g]??1.0)*100);
     emb=new EmbedBuilder().setTitle('🎵 '+np.title).setColor(0x1DB954)
       .addFields(
-        {name:'✨ เจ้าของเพลง',value:'`'+(np.author||'?')+'`',inline:true},
+        {name:'✨ เจ้าของเพลง',value:'`'+(np.author||'-')+'`',inline:true},
         {name:'⏱️ ความยาว',value:'`'+np.duration+'`',inline:true},
         {name:'🎵 คิว',value:'`'+q.length+'` เพลง',inline:true},
         {name:'👤 ขอโดย',value:np.requester,inline:true},
@@ -238,7 +238,7 @@ async function updateUI(client,g){
     if(np.thumbnail) emb.setImage(np.thumbnail);
     rows=makeRows();
   } else {
-    emb=new EmbedBuilder().setTitle('🎶 แมวส้มชาวด์').setDescription('พิมพ์ชื่อเพลงหรือลิงก์ YouTube! ✨').setColor(0x1DB954);
+    emb=new EmbedBuilder().setTitle('🎶 แมวส้มชาวด์').setDescription('พิมพ์ชื่อเพลงหรือลิงก์ YouTube ได้เลย! ✨').setColor(0x1DB954);
     rows=[];
   }
   try{ if(controlMessages[g]) await controlMessages[g].edit({embeds:[emb],components:rows}); else controlMessages[g]=await ch.send({embeds:[emb],components:rows}); }
@@ -293,33 +293,33 @@ client.on(Events.InteractionCreate, async it=>{
     if(cmd==='setup'){
       try{ await it.deferReply({flags}); }catch(e){ return; }
       let ch=it.guild.channels.cache.find(c=>c.name==='🎵・ห้องขอเพลง');
-      if(ch){ requestChannels[g]=ch.id; saveChannels(); return it.editReply({content:'📌 มีแล้ว: '+ch}); }
+      if(ch){ requestChannels[g]=ch.id; saveChannels(); return it.editReply({content:'📌 มีห้องขอเพลงอยู่แล้ว: '+ch}); }
       try{
         ch=await it.guild.channels.create({name:'🎵・ห้องขอเพลง',type:ChannelType.GuildText});
         requestChannels[g]=ch.id; saveChannels();
-        const emb=new EmbedBuilder().setTitle('🎶 แมวส้มชาวด์').setDescription('พิมพ์ชื่อเพลงหรือว่างลิงค์เพลงได้เลย! ✨').setColor(0x1DB954);
+        const emb=new EmbedBuilder().setTitle('🎶 แมวส้มชาวด์').setDescription('พิมพ์ชื่อเพลงหรือลิงก์ YouTube ได้เลย! ✨').setColor(0x1DB954);
         controlMessages[g]=await ch.send({embeds:[emb]});
-        await it.editReply({content:'✅ สร้างแล้ว: '+ch});
-      }catch(e){ await it.editReply({content:'❌ '+e.message}); }
+        await it.editReply({content:'✅ สร้างห้องสำเร็จ: '+ch});
+      }catch(e){ await it.editReply({content:'❌ เกิดข้อผิดพลาด: '+e.message}); }
       return;
     }
-    if(cmd==='join'){ const vc=it.member?.voice?.channel; if(!vc) return it.reply({content:'❌ เข้าห้องเสียงก่อน',flags}).catch(()=>{}); try{ await ensureVoice(it.guild,vc); return it.reply({content:'📥 '+vc.name,flags}).catch(()=>{}); }catch(e){ return it.reply({content:'❌ '+e.message,flags}).catch(()=>{}); } }
-    if(cmd==='leave'){ killProcs(g); try{connections[g]?.destroy()}catch(e){} delete connections[g]; return it.reply({content:'👋',flags}).catch(()=>{}); }
-    if(cmd==='skip'){ if(players[g]){ killProcs(g); try{players[g].stop()}catch(e){} return it.reply({content:'⏭️',flags}).catch(()=>{}); } return it.reply({content:'❌',flags}).catch(()=>{}); }
-    if(cmd==='clear'){ queues[g]=[]; return it.reply({content:'🗑️',flags}).catch(()=>{}); }
+    if(cmd==='join'){ const vc=it.member?.voice?.channel; if(!vc) return it.reply({content:'❌ กรุณาเข้าห้องเสียงก่อน',flags}).catch(()=>{}); try{ await ensureVoice(it.guild,vc); return it.reply({content:'📥 เข้าห้อง: '+vc.name,flags}).catch(()=>{}); }catch(e){ return it.reply({content:'❌ '+e.message,flags}).catch(()=>{}); } }
+    if(cmd==='leave'){ killProcs(g); try{connections[g]?.destroy()}catch(e){} delete connections[g]; return it.reply({content:'👋 ออกจากห้องเสียงแล้ว',flags}).catch(()=>{}); }
+    if(cmd==='skip'){ if(players[g]){ killProcs(g); try{players[g].stop()}catch(e){} return it.reply({content:'⏭️ ข้ามเพลงแล้ว',flags}).catch(()=>{}); } return it.reply({content:'❌ ไม่มีเพลงกำลังเล่น',flags}).catch(()=>{}); }
+    if(cmd==='clear'){ queues[g]=[]; return it.reply({content:'🗑️ ล้างคิวเพลงทั้งหมดแล้ว',flags}).catch(()=>{}); }
   }
 
   if(it.isButton()){
     const id=it.customId;
     try{ await it.deferReply({flags}); }catch(e){ return; }
-    if(id==='stop'){ queues[g]=[]; killProcs(g); try{players[g]?.stop()}catch(e){} delete players[g]; try{connections[g]?.destroy()}catch(e){} delete connections[g]; nowPlaying[g]=null; await updateUI(client,g); return it.editReply({content:'⏹️'}).catch(()=>{}); }
-    if(id==='pause'){ const p=players[g]; if(!p) return it.editReply({content:'❌'}).catch(()=>{}); if(p.state.status===AudioPlayerStatus.Playing){p.pause(); return it.editReply({content:'⏸️'}).catch(()=>{});} if(p.state.status===AudioPlayerStatus.Paused){p.unpause(); return it.editReply({content:'▶️'}).catch(()=>{});} return it.editReply({content:'❌'}).catch(()=>{}); }
-    if(id==='skip'){ if(players[g]){ killProcs(g); try{players[g].stop()}catch(e){} return it.editReply({content:'⏭️'}).catch(()=>{}); } return it.editReply({content:'❌'}).catch(()=>{}); }
-    if(id==='vol_up'){ const c=volumes[g]??1.0; volumes[g]=Math.min(2.0,c+0.1); applyVol(g); await updateUI(client,g); return it.editReply({content:'🔊'}).catch(()=>{}); }
-    if(id==='vol_down'){ const c=volumes[g]??1.0; volumes[g]=Math.max(0,c-0.1); applyVol(g); await updateUI(client,g); return it.editReply({content:'🔉'}).catch(()=>{}); }
-    if(id==='vol_mute'){ const c=volumes[g]??1.0; volumes[g]=c>0?0:1.0; applyVol(g); await updateUI(client,g); return it.editReply({content:'🔇'}).catch(()=>{}); }
-    if(id==='shuffle'){ const q=queues[g]||[]; if(q.length>1){ for(let i=q.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [q[i],q[j]]=[q[j],q[i]]; } await updateUI(client,g); return it.editReply({content:'🔀'}).catch(()=>{}); } return it.editReply({content:'❌'}).catch(()=>{}); }
-    if(id==='loop'){ const c=loopModes[g]||'off'; loopModes[g]=c==='off'?'single':(c==='single'?'queue':'off'); await updateUI(client,g); return it.editReply({content:'🔁'}).catch(()=>{}); }
+    if(id==='stop'){ queues[g]=[]; killProcs(g); try{players[g]?.stop()}catch(e){} delete players[g]; try{connections[g]?.destroy()}catch(e){} delete connections[g]; nowPlaying[g]=null; await updateUI(client,g); return it.editReply({content:'⏹️ หยุดเพลงและออกจากห้องแล้ว'}).catch(()=>{}); }
+    if(id==='pause'){ const p=players[g]; if(!p) return it.editReply({content:'❌ ไม่มีเพลงกำลังเล่น'}).catch(()=>{}); if(p.state.status===AudioPlayerStatus.Playing){p.pause(); return it.editReply({content:'⏸️ พักเพลงชั่วคราว'}).catch(()=>{});} if(p.state.status===AudioPlayerStatus.Paused){p.unpause(); return it.editReply({content:'▶️ เล่นเพลงต่อ'}).catch(()=>{});} return it.editReply({content:'❌ ไม่สามารถทำรายการได้'}).catch(()=>{}); }
+    if(id==='skip'){ if(players[g]){ killProcs(g); try{players[g].stop()}catch(e){} return it.editReply({content:'⏭️ ข้ามเพลงแล้ว'}).catch(()=>{}); } return it.editReply({content:'❌ ไม่มีเพลงกำลังเล่น'}).catch(()=>{}); }
+    if(id==='vol_up'){ const c=volumes[g]??1.0; volumes[g]=Math.min(2.0,c+0.1); applyVol(g); await updateUI(client,g); return it.editReply({content:'🔊 เพิ่มเสียงเป็น '+Math.round(volumes[g]*100)+('%')}).catch(()=>{}); }
+    if(id==='vol_down'){ const c=volumes[g]??1.0; volumes[g]=Math.max(0,c-0.1); applyVol(g); await updateUI(client,g); return it.editReply({content:'🔉 ลดเสียงเป็น '+Math.round(volumes[g]*100)+('%')}).catch(()=>{}); }
+    if(id==='vol_mute'){ const c=volumes[g]??1.0; volumes[g]=c>0?0:1.0; applyVol(g); await updateUI(client,g); return it.editReply({content:volumes[g]===0?'🔇 ปิดเสียง':'🔊 เปิดเสียง'}).catch(()=>{}); }
+    if(id==='shuffle'){ const q=queues[g]||[]; if(q.length>1){ for(let i=q.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [q[i],q[j]]=[q[j],q[i]]; } await updateUI(client,g); return it.editReply({content:'🔀 สลับคิวเพลงเรียบร้อย'}).catch(()=>{}); } return it.editReply({content:'❌ เพลงในคิวน้อยเกินกว่าจะสลับ'}).catch(()=>{}); }
+    if(id==='loop'){ const c=loopModes[g]||'off'; loopModes[g]=c==='off'?'single':(c==='single'?'queue':'off'); await updateUI(client,g); return it.editReply({content:'🔁 เปลี่ยนโหมด Loop เป็น: '+loopModes[g].toUpperCase()}).catch(()=>{}); }
   }
 
   if(it.isStringSelectMenu()&&it.customId==='effect_select'){
@@ -327,7 +327,7 @@ client.on(Events.InteractionCreate, async it=>{
     currentEffects[g]=c==='normal'?null:c;
     try{ await it.deferReply({flags}); }catch(e){ return; }
     await updateUI(client,g);
-    return it.editReply({content:'✨ '+c.toUpperCase()}).catch(()=>{});
+    return it.editReply({content:'✨ เปลี่ยนเอฟเฟกต์เสียงเป็น: '+c.toUpperCase()}).catch(()=>{});
   }
 });
 
