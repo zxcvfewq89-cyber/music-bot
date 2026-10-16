@@ -1,5 +1,5 @@
 app = "music-bot"
-primary_region = "sin"
+primary_region = "nrt"
 
 [build]
   dockerfile = "Dockerfile"
