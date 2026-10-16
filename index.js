@@ -297,7 +297,7 @@ client.on(Events.InteractionCreate, async it=>{
       try{
         ch=await it.guild.channels.create({name:'🎵・ห้องขอเพลง',type:ChannelType.GuildText});
         requestChannels[g]=ch.id; saveChannels();
-        const emb=new EmbedBuilder().setTitle('🎶 แมวส้มชาวด์').setDescription('พิมพ์ชื่อเพลง! ✨').setColor(0x1DB954);
+        const emb=new EmbedBuilder().setTitle('🎶 แมวส้มชาวด์').setDescription('พิมพ์ชื่อเพลงหรือว่างลิงค์เพลงได้เลย! ✨').setColor(0x1DB954);
         controlMessages[g]=await ch.send({embeds:[emb]});
         await it.editReply({content:'✅ สร้างแล้ว: '+ch});
       }catch(e){ await it.editReply({content:'❌ '+e.message}); }
