@@ -1,6 +1,6 @@
 FROM node:20-slim
 
-# ติดตั้ง ffmpeg และ curl ไว้ในระบบคอนเทนเนอร์โดยตรง
+# ติดตั้ง ffmpeg, curl และ python สำหรับดาวน์โหลดและแปลงเสียงเพลง
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     curl \
