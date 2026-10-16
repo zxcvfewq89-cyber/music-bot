@@ -5,6 +5,7 @@
   "dependencies": {
     "@discordjs/voice": "^0.16.1",
     "discord.js": "^14.14.0",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "play-dl": "^1.9.7"
   }
 }
