@@ -13,4 +13,4 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --production
 COPY . .
-CMD ["node", "app.js"]
+CMD ["node", "index.js"]
